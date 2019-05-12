@@ -89,4 +89,17 @@ public class Tile {
         g.drawString("" + value, drawX, drawY);
         g.dispose();
     }
+    
+    public void update() {
+
+    }
+
+    public void render(Graphics2D g) {
+        g.drawImage(tileImage, x, y, null);
+    }
+
+    public int getValue() {
+        return value;
+    }
+    
 }
