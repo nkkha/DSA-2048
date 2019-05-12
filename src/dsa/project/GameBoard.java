@@ -35,6 +35,7 @@ public class GameBoard {
         finalBoard = new BufferedImage(BOARD_WIDTH, BOARD_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
         createBoardImage();
+        start();
     }
 
     private void createBoardImage() {
@@ -51,12 +52,51 @@ public class GameBoard {
             }
         }
     }
+    
+    private void start() {
+        for (int i = 0; i < startingTiles; i++) {
+            spawnRandom();
+        }
+    }
+
+    private void spawnRandom() {
+        Random random = new Random();
+        boolean notValid = true;
+
+        while (notValid) {
+            int location = random.nextInt(ROWS * COLS);
+            int row = location / ROWS;
+            int col = location % COLS;
+            Tile current = board[row][col];
+            if (current == null) {
+                int value = random.nextInt(10) < 9 ? 2 : 4;
+                Tile tile = new Tile(value, getTileX(col), getTileY(row));
+                board[row][col] = tile;
+                notValid = false;
+            }
+        }
+    }
+
+    public int getTileX(int col) {
+        return SPACING + col * Tile.WIDTH + col * SPACING;
+    }
+
+    public int getTileY(int row) {
+        return SPACING + row * Tile.HEIGHT + row * SPACING;
+    }
 
     public void render(Graphics2D g) {
         Graphics2D g2d = (Graphics2D) finalBoard.getGraphics();
         g2d.drawImage(gameBoard, 0, 0, null);
 
-        // draw tiles
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                Tile current = board[row][col];
+                if (current == null)
+                    continue;
+                current.render(g2d);
+            }
+        }
 
         g.drawImage(finalBoard, x, y, null);
         g2d.dispose();
@@ -65,6 +105,19 @@ public class GameBoard {
 
     public void update() {
         checkKeys();
+        
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                Tile current = board[row][col];
+                if (current == null)
+                    continue;
+                current.update();
+                //reset position
+                if (current.getValue() == 2048) {
+                    won = true;
+                }
+            }
+        }
     }
 
 
