@@ -9,8 +9,8 @@ import com.sun.glass.events.KeyEvent;
 
 public class GameBoard {
 
-    public static final int ROWS = 4;
-    public static final int COLS = 4;
+    public static final int ROWS = 5;
+    public static final int COLS = 5;
 
     private final int startingTiles = 2;
     private Tile[][] board;
@@ -42,12 +42,18 @@ public class GameBoard {
         Graphics2D g = (Graphics2D) gameBoard.getGraphics();
         g.setColor(Color.DARK_GRAY);
         g.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
-        g.setColor(Color.LIGHT_GRAY);
+
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
                 int x = SPACING + SPACING * col + Tile.WIDTH * col;
                 int y = SPACING + SPACING * row + Tile.HEIGHT * row;
-                g.fillRoundRect(x, y, Tile.WIDTH, Tile.HEIGHT, Tile.ARC_WIDTH, Tile.ARC_HEIGHT);
+                if (col == 2 && row == 2) {
+                    g.setColor(Color.BLACK);
+                    g.fillRoundRect(x, y, Tile.WIDTH, Tile.HEIGHT, Tile.ARC_WIDTH, Tile.ARC_HEIGHT);
+                } else {
+                    g.setColor(Color.LIGHT_GRAY);
+                    g.fillRoundRect(x, y, Tile.WIDTH, Tile.HEIGHT, Tile.ARC_WIDTH, Tile.ARC_HEIGHT);
+                }
             }
         }
     }
@@ -58,10 +64,6 @@ public class GameBoard {
         }
     }
 
-    private void spawn(int row, int col, int value) {
-        board[row][col] = new Tile(value, getTileX(col), getTileY(row));
-    }
-
     private void spawnRandom() {
         Random random = new Random();
         boolean notValid = true;
@@ -70,12 +72,15 @@ public class GameBoard {
             int location = random.nextInt(ROWS * COLS);
             int row = location / ROWS;
             int col = location % COLS;
-            Tile current = board[row][col];
-            if (current == null) {
-                int value = random.nextInt(10) < 9 ? 2 : 4;
-                Tile tile = new Tile(value, getTileX(col), getTileY(row));
-                board[row][col] = tile;
+            if (row == 2 && col == 2) {
                 notValid = false;
+            } else { Tile current = board[row][col];
+                    if (current == null) {
+                        int value = random.nextInt(10) < 9 ? 2 : 4;
+                        Tile tile = new Tile(value, getTileX(col), getTileY(row));
+                        board[row][col] = tile;
+                        notValid = false;
+                    }
             }
         }
     }
@@ -170,6 +175,8 @@ public class GameBoard {
         while (move) {
             newCol += horizontalDirection;
             newRow += verticalDirection;
+            if (checkBlock(newRow, newCol))
+                break;
             if (checkOutOfBounds(dir, newRow, newCol))
                 break;
             if (board[newRow][newCol] == null) {
@@ -190,6 +197,11 @@ public class GameBoard {
             }
         }
         return canMove;
+    }
+
+    private boolean checkBlock(int row, int col) {
+        if (col == 2 && row == 2) return true;
+        return false;
     }
 
     private boolean checkOutOfBounds(Direction dir, int row, int col) {
