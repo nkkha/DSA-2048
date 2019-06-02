@@ -1,4 +1,4 @@
-package dsa.project;
+package dsa.project.game;
 
 import java.awt.Font;
 import java.awt.Graphics2D;

@@ -1,4 +1,4 @@
-package dsa.project;
+package dsa.project.game;
 
 public class Point {
 
