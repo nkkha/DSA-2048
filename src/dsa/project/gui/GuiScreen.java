@@ -13,6 +13,7 @@ public class GuiScreen {
 	private GuiScreen() {
 		panels = new HashMap<String, GuiPanel>();
 	}
+
 	public static GuiScreen getInstance() {
 		if (screen == null) {
 			screen = new GuiScreen();

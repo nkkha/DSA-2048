@@ -8,7 +8,7 @@ import java.awt.event.ActionEvent;
 
 public class MainMenuPanel extends GuiPanel {
 
-    private Font titleFont = Game.main.deriveFont(100f);
+    private Font titleFont = Game.main.deriveFont(120f);
     private Font creatorFont = Game.main.deriveFont(24f);
     private String title = "2048";
     private String sign = "Project DSA";
@@ -54,8 +54,8 @@ public class MainMenuPanel extends GuiPanel {
     public void render(Graphics2D g) {
         super.render(g);
         g.setFont(titleFont);
-        g.setColor(Color.black);
-        g.drawString(title, Game.WIDTH / 2 - DrawUtils.getMessageWidth(title, titleFont, g) / 2, 150);
+        g.setColor(Color.RED);
+        g.drawString(title, Game.WIDTH / 2 - DrawUtils.getMessageWidth(title, titleFont, g) / 2, 200);
         g.setFont(creatorFont);
         g.drawString(sign, 20, Game.HEIGHT - 10);
     }

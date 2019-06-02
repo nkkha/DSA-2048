@@ -26,9 +26,9 @@ public class GuiButton {
 	public GuiButton(int x, int y, int width, int height){
 		clickBox = new Rectangle(x, y, width, height);
 		actionListeners = new ArrayList<ActionListener>();
-		released = new Color(173, 177, 179);
-		hover = new Color(150, 156, 158);
-		pressed = new Color(111, 116, 117);
+		released = Color.yellow;
+		hover = Color.orange;
+		pressed = Color.red;
 	}
 	
 	public void update(){
@@ -46,7 +46,7 @@ public class GuiButton {
 			g.setColor(hover);
 			g.fill(clickBox);
 		}
-		g.setColor(Color.white);
+		g.setColor(Color.darkGray);
 		g.setFont(font);
 		g.drawString(text, clickBox.x + clickBox.width / 2  - DrawUtils.getMessageWidth(text, font, g) / 2, clickBox.y + clickBox.height / 2  + DrawUtils.getMessageHeight(text, font, g) / 2);
 	}
