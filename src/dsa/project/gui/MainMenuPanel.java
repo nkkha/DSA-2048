@@ -5,17 +5,16 @@ import dsa.project.game.Game;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class MainMenuPanel extends GuiPanel {
 
-    private Font titleFont = Game.main.deriveFont(120f);
+    private Font titleFont = Game.main.deriveFont(100f);
     private Font creatorFont = Game.main.deriveFont(24f);
     private String title = "2048";
-    private String sign = "Project DSA";
+    private String creator = "DSA Project";
     private int buttonWidth = 220;
-    //    private ScoreManager scores;
     private int a = 310;
+    public static boolean newGame = false;
     public GuiButton Resume;
     public GuiButton playButton;
     public GuiButton scoresButton;
@@ -23,37 +22,34 @@ public class MainMenuPanel extends GuiPanel {
 
     public MainMenuPanel() {
         super();
+        Resume = new GuiButton(Game.WIDTH / 2 - buttonWidth / 2, 220, buttonWidth, 60);
         playButton = new GuiButton(Game.WIDTH / 2 - buttonWidth / 2, a, buttonWidth, 60);
         scoresButton = new GuiButton(Game.WIDTH / 2 - buttonWidth / 2, a + 90, buttonWidth, 60);
         quitButton = new GuiButton(Game.WIDTH / 2 - buttonWidth / 2, a + 180, buttonWidth, 60);
 
-        playButton.setText("Play");
-        scoresButton.setText("Scores");
-        quitButton.setText("Quit");
-
-        playButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                GuiScreen.getInstance().setCurrentPanel("Play");
-            }
+        Resume.addActionListener((ActionEvent e) -> {
+            GuiScreen.getInstance().setCurrentPanel("Play");
         });
+        Resume.setText("Resume");
+        add(Resume);
+
+        playButton.addActionListener((ActionEvent e) -> {
+            GuiScreen.getInstance().setCurrentPanel("Play");
+            newGame = true;
+        });
+        playButton.setText("New Game");
         add(playButton);
 
-        scoresButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                GuiScreen.getInstance().setCurrentPanel("Leaderboards");
-            }
+        scoresButton.addActionListener((ActionEvent e) -> {
+            GuiScreen.getInstance().setCurrentPanel("Leaderboards");
         });
+        scoresButton.setText("Scores");
         add(scoresButton);
 
-        quitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
+        quitButton.addActionListener((ActionEvent e) -> {
+            System.exit(0);
         });
-
+        quitButton.setText("Quit");
         add(quitButton);
     }
 
@@ -66,9 +62,9 @@ public class MainMenuPanel extends GuiPanel {
         super.render(g);
         g.setFont(titleFont);
         g.setColor(Color.RED);
-        g.drawString(title, Game.WIDTH / 2 - DrawUtils.getMessageWidth(title, titleFont, g) / 2, 200);
+        g.drawString(title, Game.WIDTH / 2 - DrawUtils.getMessageWidth(title, titleFont, g) / 2, 150);
         g.setFont(creatorFont);
-        g.drawString(sign, 20, Game.HEIGHT - 10);
+        g.drawString(creator, 20, Game.HEIGHT - 10);
     }
 
 }

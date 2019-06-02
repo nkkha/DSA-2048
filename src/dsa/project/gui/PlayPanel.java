@@ -40,36 +40,15 @@ public class PlayPanel extends GuiPanel {
         scores = board.getScores();
         info = new BufferedImage(Game.WIDTH, 200, BufferedImage.TYPE_INT_RGB);
         mainMenu = new GuiButton(Game.WIDTH / 2 - largeButtonWidth / 2, 450, largeButtonWidth, buttonHeight);
-        tryAgain = new GuiButton(mainMenu.getX(), mainMenu.getY() - spacing - buttonHeight, smallButtonWidth, buttonHeight);
-        screenShot = new GuiButton(tryAgain.getX() + tryAgain.getWidth() + spacing, tryAgain.getY() ,smallButtonWidth, buttonHeight);
-
-        tryAgain.setText("Try Again");
+        screenShot = new GuiButton(Game.WIDTH / 2 - largeButtonWidth / 2, 375, largeButtonWidth, buttonHeight);
         screenShot.setText("Screenshot");
         mainMenu.setText("Back to Main Menu");
-
-        tryAgain.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                board.getScores().reset();
-                board.reset();
-                alpha = 0;
-
-                remove(tryAgain);
-                remove(screenShot);
-                remove(mainMenu);
-
-                added = false;
-            }
-        });
-
         screenShot.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 screenshot = true;
             }
         });
         mainMenu.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 newGame = true;
                 GuiScreen.getInstance().setCurrentPanel("Menu");
@@ -105,11 +84,19 @@ public class PlayPanel extends GuiPanel {
         g.setColor(Color.red);
         g.setFont(gameOverFont);
         g.drawString("Game Over!", Game.WIDTH / 2 - DrawUtils.getMessageWidth("Game Over!", gameOverFont, g) / 2, 250);
+        g.setColor(Color.black);
+        g.setFont(scoreFont);
+        g.drawString("Press ESC to Try Again", Game.WIDTH / 2 - DrawUtils.getMessageWidth("Press ESC to Try Again", scoreFont, g) / 2, 325);
     }
 
     @Override
     public void update() {
         board.update();
+        if (true == MainMenuPanel.newGame) {
+            newGame = true;
+            MainMenuPanel.newGame = false;
+        }
+        newGame();
         if (board.isDead()) {
             alpha++;
             if (alpha > 170) alpha = 170;
@@ -139,10 +126,23 @@ public class PlayPanel extends GuiPanel {
                 added = true;
                 add(mainMenu);
                 add(screenShot);
-                add(tryAgain);
             }
             drawGameOver(g);
         }
         super.render(g);
+    }
+
+    public void newGame() {
+        if (!Keys.pressed[KeyEvent.VK_ESCAPE] && Keys.prev[KeyEvent.VK_ESCAPE] || newGame) {
+            board.reset();
+            scores.reset();
+            if (added) {
+                remove(mainMenu);
+                remove(screenShot);
+                alpha = 0;
+                added = false;
+            }
+            newGame = false;
+        }
     }
 }

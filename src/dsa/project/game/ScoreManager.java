@@ -1,16 +1,17 @@
 package dsa.project.game;
 
 import java.io.*;
+import java.util.Random;
 
 public class ScoreManager {
 
-    // Current scores
+    // Current Scores
     private int currentScore;
     private int currentTopScore;
     private long time;
     private long startingTime;
     private long bestTime;
-    private int[] board = new int[GameBoard.COLS * GameBoard.ROWS];
+    private int[] board = new int[25];
 
     // File
     private String filePath;
@@ -58,13 +59,13 @@ public class ScoreManager {
             writer.newLine();
             writer.write("" + 0);
             writer.newLine();
-
+            writer.write("" + 300000);
+            writer.newLine();
             for (int row = 0; row < GameBoard.ROWS; row++) {
                 for (int col = 0; col < GameBoard.COLS; col++) {
-                    if(row == GameBoard.ROWS - 1 && col == GameBoard.COLS - 1){
+                    if (row == GameBoard.ROWS - 1 && col == GameBoard.COLS - 1) {
                         writer.write("" + 0);
-                    }
-                    else{
+                    } else {
                         writer.write(0 + "-");
                     }
                 }
@@ -90,7 +91,6 @@ public class ScoreManager {
             writer.newLine();
             writer.write("" + bestTime);
             writer.newLine();
-
             for (int row = 0; row < GameBoard.ROWS; row++) {
                 for (int col = 0; col < GameBoard.COLS; col++) {
                     this.board[row * GameBoard.COLS + col] = gBoard.getBoard()[row][col] != null ? gBoard.getBoard()[row][col].getValue() : 0;
@@ -159,12 +159,12 @@ public class ScoreManager {
         this.bestTime = bestTime;
     }
 
-    public int[] getBoard() {
-        return board;
-    }
-
     public boolean newGame() {
         return newGame;
+    }
+
+    public int[] getBoard() {
+        return board;
     }
 
 }

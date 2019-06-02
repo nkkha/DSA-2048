@@ -3,14 +3,10 @@ package dsa.project.gui;
 import dsa.project.game.DrawUtils;
 import dsa.project.game.Game;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-
 
 public class GuiButton {
 
@@ -46,7 +42,7 @@ public class GuiButton {
 			g.setColor(hover);
 			g.fill(clickBox);
 		}
-		g.setColor(Color.darkGray);
+		g.setColor(Color.DARK_GRAY);
 		g.setFont(font);
 		g.drawString(text, clickBox.x + clickBox.width / 2  - DrawUtils.getMessageWidth(text, font, g) / 2, clickBox.y + clickBox.height / 2  + DrawUtils.getMessageHeight(text, font, g) / 2);
 	}
@@ -66,7 +62,8 @@ public class GuiButton {
 			for(ActionListener al : actionListeners){
 				al.actionPerformed(null);
 			}
-		}
+
+                }
 		currentState = State.RELEASED;
 	}
 

@@ -13,7 +13,7 @@ public class Leaderboards {
     private ArrayList<Integer> topTiles;
     private ArrayList<Long> topTimes;
 
-    private Leaderboards(){
+    private Leaderboards() {
         try {
             filePath = new File("").getAbsolutePath();
             System.out.println(filePath);
@@ -27,16 +27,16 @@ public class Leaderboards {
         topTimes = new ArrayList<Long>();
     }
 
-    public static Leaderboards getInstance(){
-        if(lBoard == null){
+    public static Leaderboards getInstance() {
+        if (lBoard == null) {
             lBoard = new Leaderboards();
         }
         return lBoard;
     }
 
-    public void addScore(int score){
-        for(int i = 0; i < topTiles.size(); i++){
-            if(score >= topScores.get(i)){
+    public void addScore(int score) {
+        for (int i = 0; i < topTiles.size(); i++) {
+            if (score >= topScores.get(i)) {
                 topScores.add(i, score);
                 topScores.remove(topScores.size() - 1);
                 return;
@@ -44,9 +44,9 @@ public class Leaderboards {
         }
     }
 
-    public void addTile(int tileValue){
-        for(int i = 0; i < topTiles.size(); i++){
-            if(tileValue >= topTiles.get(i)){
+    public void addTile(int tileValue) {
+        for (int i = 0; i < topTiles.size(); i++) {
+            if (tileValue >= topTiles.get(i)) {
                 topTiles.add(i, tileValue);
                 topTiles.remove(topTiles.size() - 1);
                 return;
@@ -54,9 +54,9 @@ public class Leaderboards {
         }
     }
 
-    public void addTime(long millis){
-        for(int i = 0; i < topTimes.size(); i++){
-            if(millis <= topTimes.get(i)){
+    public void addTime(long millis) {
+        for (int i = 0; i < topTimes.size(); i++) {
+            if (millis <= topTimes.get(i)) {
                 topTimes.add(i, millis);
                 topTimes.remove(topTimes.size() - 1);
                 return;
@@ -132,11 +132,11 @@ public class Leaderboards {
         }
     }
 
-    public int getHighScore(){
+    public int getHighScore() {
         return topScores.get(0);
     }
 
-    public long getFastestTime(){
+    public long getFastestTime() {
         return topTimes.get(0);
     }
 
@@ -151,5 +151,4 @@ public class Leaderboards {
     public ArrayList<Long> getTopTimes() {
         return topTimes;
     }
-
 }

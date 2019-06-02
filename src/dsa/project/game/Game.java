@@ -1,27 +1,23 @@
 package dsa.project.game;
 
-import dsa.project.gui.GuiScreen;
-import dsa.project.gui.MainMenuPanel;
+import dsa.project.gui.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
-public class Game extends JPanel implements KeyListener, MouseListener, MouseMotionListener, Runnable {
+public class Game extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 
     private static final long serialVersionUID = 1L;
-    public static final int WIDTH = 500;
-    public static final int HEIGHT = 730;
+    public static final int WIDTH = GameBoard.BOARD_WIDTH + 40;
+    public static final int HEIGHT = 700;
     public static final Font main = new Font("Bebas Neue Regular", Font.PLAIN, 28);
     private Thread game;
     private boolean running;
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private GuiScreen screen;
-
-    private long startTime;
-    private long elapsed;
-    private boolean set;
+    private GameBoard board;
 
     public Game() {
         setFocusable(true);
@@ -29,15 +25,17 @@ public class Game extends JPanel implements KeyListener, MouseListener, MouseMot
         addKeyListener(this);
         addMouseListener(this);
         addMouseMotionListener(this);
-
         screen = GuiScreen.getInstance();
         screen.add("Menu", new MainMenuPanel());
+        screen.add("Play", new PlayPanel());
+        screen.add("Leaderboards", new LeaderboardsPanel());
         screen.setCurrentPanel("Menu");
     }
 
     private void update() {
         screen.update();
-        Keyboard.update();
+
+        Keys.update();
     }
 
     private void render() {
@@ -50,7 +48,6 @@ public class Game extends JPanel implements KeyListener, MouseListener, MouseMot
         Graphics2D g2d = (Graphics2D) getGraphics();
         g2d.drawImage(image, 0, 0, null);
         g2d.dispose();
-
     }
 
     @Override
@@ -66,19 +63,22 @@ public class Game extends JPanel implements KeyListener, MouseListener, MouseMot
         while (running) {
 
             boolean shouldRender = false;
+
             double now = System.nanoTime();
             unprocessed += (now - then) / nsPerUpdate;
             then = now;
 
-            // update queue
+            // Update queue
             while (unprocessed >= 1) {
+
+                // update
                 updates++;
                 update();
                 unprocessed--;
                 shouldRender = true;
             }
 
-            // render
+            // Render
             if (shouldRender) {
                 fps++;
                 render();
@@ -90,39 +90,29 @@ public class Game extends JPanel implements KeyListener, MouseListener, MouseMot
                     e.printStackTrace();
                 }
             }
-        }
 
-        // FPS Timer
-        if (System.currentTimeMillis() - fpsTimer > 1000) {
-            System.out.printf("%d fps %d updates", fps, updates);
-            System.out.println();
-            fps = 0;
-            updates = 0;
-            fpsTimer += 1000;
+            // FPS timer
+            if (System.currentTimeMillis() - fpsTimer > 1000) {
+                System.out.printf("%d fps %d updates", fps, updates);
+                System.out.println(" " + GameBoard.getTime());
+                fps = 0;
+                updates = 0;
+                fpsTimer += 1000;
+            }
         }
     }
 
     public synchronized void start() {
-        if(running) return;
+        if (running) return;
         running = true;
         game = new Thread(this, "game");
         game.start();
     }
 
     public synchronized void stop() {
-        if(!running) return;
+        if (!running) return;
         running = false;
         System.exit(0);
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        Keyboard.keyPressed(e);
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        Keyboard.keyReleased(e);
     }
 
     @Override
@@ -131,8 +121,17 @@ public class Game extends JPanel implements KeyListener, MouseListener, MouseMot
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void keyPressed(KeyEvent e) {
+        Keys.keyPressed(e);
+    }
 
+    @Override
+    public void keyReleased(KeyEvent e) {
+        Keys.keyReleased(e);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
     }
 
     @Override
@@ -147,12 +146,10 @@ public class Game extends JPanel implements KeyListener, MouseListener, MouseMot
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
     }
 
     @Override
