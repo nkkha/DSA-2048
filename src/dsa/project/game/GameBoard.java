@@ -20,102 +20,65 @@ public class GameBoard {
     private BufferedImage finalBoard;
     private int x;
     private int y;
-    private int score = 0;
-    private int highScore = 0;
-    private Font scoreFont;
 
     private static int SPACING = 10;
     public static int BOARD_WIDTH = (COLS + 1) * SPACING + COLS * Tile.WIDTH;
     public static int BOARD_HEIGHT = (ROWS + 1) * SPACING + ROWS * Tile.HEIGHT;
 
     private long elapsedMS;
-    private long fastestMS;
     private long startTime;
     private boolean hasStarted;
-    private String formattedTime = "00:00:000";
+    private int saveCount;
 
     // Saving
     private String saveDataPath;
     private String fileName = "SaveData";
 
-    public GameBoard(int x, int y){
-        try{
-            saveDataPath = GameBoard.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-            saveDataPath = System.getProperty("user.home") + "\\Desktop";
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
+    private ScoreManager scores;
+    private Leaderboards lBoard;
 
-        scoreFont = Game.main.deriveFont(24f);
+    public GameBoard(int x, int y){
         this.x = x;
         this.y = y;
         board = new Tile[ROWS][COLS];
         gameBoard = new BufferedImage(BOARD_WIDTH, BOARD_HEIGHT, BufferedImage.TYPE_INT_RGB);
         finalBoard = new BufferedImage(BOARD_WIDTH, BOARD_HEIGHT, BufferedImage.TYPE_INT_RGB);
-        startTime = System.nanoTime();
 
-        loadHighScore();
         createBoardImage();
+
+        lBoard = Leaderboards.getInstance();
+        lBoard.loadScores();
+        scores = new ScoreManager(this);
+        scores.setBestTime(lBoard.getFastestTime());
+        scores.setCurrentTopScore(lBoard.getHighScore());
+        if (scores.newGame()) {
+            start();
+            scores.saveGame();
+        } else  {
+            for (int i = 0; i < scores.getBoard().length; i++) {
+                if (scores.getBoard()[i] == 0) continue;
+                spawn(i / ROWS, i % COLS, scores.getBoard()[i]);
+            }
+
+            dead = checkDead();
+            won = checkWon();
+        }
+    }
+
+    private void spawn(int row, int col, int value) {
+        board[row][col] = new Tile(value, getTileX(col), getTileY(row));
+    }
+
+    private void reset() {
+        board = new Tile[ROWS][COLS];
         start();
-    }
-
-    private void createSaveData(){
-        try{
-            File file = new File(saveDataPath, fileName);
-
-            FileWriter output = new FileWriter(file);
-            BufferedWriter writer = new BufferedWriter(output);
-            writer.write(""+ 0);
-            writer.newLine();
-            writer.write("" + Integer.MAX_VALUE);
-            writer.close();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    private void loadHighScore(){
-        try{
-            File f = new File(saveDataPath, fileName);
-            if(!f.isFile()){
-                createSaveData();
-            }
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-            highScore = Integer.parseInt(reader.readLine());
-            fastestMS = Long.parseLong(reader.readLine());
-            reader.close();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    private void setHighScore(){
-        FileWriter output = null;
-
-        try{
-            File f = new File(saveDataPath, fileName);
-            output = new FileWriter(f);
-            BufferedWriter writer = new BufferedWriter(output);
-
-            writer.write("" + highScore);
-            writer.newLine();
-
-            if(elapsedMS <= fastestMS && won){
-                writer.write("" + elapsedMS);
-            }
-            else{
-                writer.write("" + fastestMS);
-            }
-
-            writer.close();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
+        scores.saveGame();
+        dead = false;
+        won = false;
+        hasStarted = false;
+        startTime = System.nanoTime();
+        elapsedMS = 0;
+        saveCount = 0;
     }
 
     private void createBoardImage() {
@@ -187,23 +150,18 @@ public class GameBoard {
 
         g.drawImage(finalBoard, x, y, null);
         g2d.dispose();
-
-        g.setColor(Color.lightGray);
-        g.setFont(scoreFont);
-        g.drawString("Score: " + score, 30, 50);
-        g.setColor(Color.red);
-        g.drawString("Highest Score: " + highScore, Game.WIDTH - DrawUtils.getMessageWidth("Highest Score: " + highScore,  scoreFont, g) - 50, 50);
-        g.setColor(Color.black);
-        g.drawString("Time: " + formattedTime, 30, 90);
-        g.setColor(Color.red);
-        g.drawString("Fastest: " + formatTime(fastestMS), Game.WIDTH - DrawUtils.getMessageWidth("Fastest: " + formatTime(fastestMS), scoreFont, g) - 20, 90);
     }
 
     public void update(){
+        saveCount++;
+        if (saveCount >= 120) {
+            saveCount = 0;
+            scores.saveGame();
+        }
         if(!won && !dead){
             if(hasStarted){
                 elapsedMS = (System.nanoTime() - startTime) / 1000000;
-                formattedTime = formatTime(elapsedMS);
+                scores.setTime(elapsedMS);
             }
             else{
                 startTime = System.nanoTime();
@@ -212,8 +170,8 @@ public class GameBoard {
 
         checkKeys();
 
-        if(score >= highScore){
-            highScore = score;
+        if (scores.getCurrentScore() > scores.getCurrentTopScore()) {
+            scores.setCurrentTopScore(scores.getCurrentScore());
         }
 
         for(int row = 0; row < ROWS; row++){
@@ -223,72 +181,72 @@ public class GameBoard {
                 current.update();
                 resetPosition(current, row, col);
                 if(current.getValue() == 2048){
-                    won = true;
+                    setWon(true);
                 }
             }
         }
     }
 
-    private String formatTime(long millis){
-        String formattedTime;
-
-        String hourFormat = "";
-        int hours = (int)(millis / 3600000);
-        if(hours >= 1){
-            millis -= hours * 3600000;
-            if(hours < 10){
-                hourFormat = "0" + hours;
-            }
-            else{
-                hourFormat = "" + hours;
-            }
-            hourFormat += ":";
-        }
-
-        String minuteFormat;
-        int minutes = (int)(millis / 60000);
-        if(minutes >= 1){
-            millis -= minutes * 60000;
-            if(minutes < 10){
-                minuteFormat = "0" + minutes;
-            }
-            else{
-                minuteFormat = "" + minutes;
-            }
-        }
-        else{
-            minuteFormat = "00";
-        }
-
-        String secondFormat;
-        int seconds = (int)(millis / 1000);
-        if(seconds >= 1){
-            millis -= seconds * 1000;
-            if(seconds < 10){
-                secondFormat = "0" + seconds;
-            }
-            else{
-                secondFormat = "" + seconds;
-            }
-        }
-        else{
-            secondFormat = "00";
-        }
-
-        String milliFormat;
-        if(millis > 99){
-            milliFormat = "" + millis;
-        }
-        else if(millis > 9){
-            milliFormat = "0" + millis;
-        }
-        else{
-            milliFormat = "00" + millis;
-        }
-
-        formattedTime = hourFormat + minuteFormat + ":" + secondFormat + ":" + milliFormat;
-        return formattedTime;
-    }
+//    private String formatTime(long millis){
+//        String formattedTime;
+//
+//        String hourFormat = "";
+//        int hours = (int)(millis / 3600000);
+//        if(hours >= 1){
+//            millis -= hours * 3600000;
+//            if(hours < 10){
+//                hourFormat = "0" + hours;
+//            }
+//            else{
+//                hourFormat = "" + hours;
+//            }
+//            hourFormat += ":";
+//        }
+//
+//        String minuteFormat;
+//        int minutes = (int)(millis / 60000);
+//        if(minutes >= 1){
+//            millis -= minutes * 60000;
+//            if(minutes < 10){
+//                minuteFormat = "0" + minutes;
+//            }
+//            else{
+//                minuteFormat = "" + minutes;
+//            }
+//        }
+//        else{
+//            minuteFormat = "00";
+//        }
+//
+//        String secondFormat;
+//        int seconds = (int)(millis / 1000);
+//        if(seconds >= 1){
+//            millis -= seconds * 1000;
+//            if(seconds < 10){
+//                secondFormat = "0" + seconds;
+//            }
+//            else{
+//                secondFormat = "" + seconds;
+//            }
+//        }
+//        else{
+//            secondFormat = "00";
+//        }
+//
+//        String milliFormat;
+//        if(millis > 99){
+//            milliFormat = "" + millis;
+//        }
+//        else if(millis > 9){
+//            milliFormat = "0" + millis;
+//        }
+//        else{
+//            milliFormat = "00" + millis;
+//        }
+//
+//        formattedTime = hourFormat + minuteFormat + ":" + secondFormat + ":" + milliFormat;
+//        return formattedTime;
+//    }
 
     private void resetPosition(Tile current, int row, int col){
         if(current == null) return;
@@ -348,7 +306,7 @@ public class GameBoard {
                 canMove = true;
                 board[newRow - verticalDirection][newCol - horizontalDirection] = null;
                 board[newRow][newCol].setSlideTo(new Point(newRow, newCol));
-                score += board[newRow][newCol].getValue();
+                scores.setCurrentScore(scores.getCurrentScore() + board[newRow][newCol].getValue());
             } else {
                 move = false;
             }
@@ -443,23 +401,31 @@ public class GameBoard {
 
         if(canMove){
             spawnRandom();
-            checkDead();
+            setDead(checkDead());
         }
     }
 
-    private void checkDead(){
+    private boolean checkDead(){
         for(int row = 0; row < ROWS; row++){
             for(int col = 0; col < COLS; col++){
-                if(board[row][col] == null) return;
-                if(checkSurroundingTiles(row, col, board[row][col])){
-                    return;
+                if(board[row][col] == null) return false;
+                boolean canCombine = checkSurroundingTiles(row, col, board[row][col]);
+                if(canCombine){
+                    return false;
                 }
             }
         }
+        return true;
+    }
 
-        dead = true;
-        if(score >= highScore) highScore = score;
-        setHighScore();
+    private boolean checkWon() {
+        for(int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                if (board[row][col] == null) continue;
+                if (board[row][col].getValue() >= 2048) return true;
+            }
+        }
+        return false;
     }
 
     private boolean checkSurroundingTiles(int row, int col, Tile current){
@@ -489,20 +455,78 @@ public class GameBoard {
     private void checkKeys(){
         if(Keyboard.typed(KeyEvent.VK_LEFT)){
             moveTiles(Direction.LEFT);
-            if(!hasStarted) hasStarted = true;
+            if(!hasStarted) hasStarted = !dead;
         }
         if(Keyboard.typed(KeyEvent.VK_RIGHT)){
             moveTiles(Direction.RIGHT);
-            if(!hasStarted) hasStarted = true;
+            if(!hasStarted) hasStarted = !dead;
         }
         if(Keyboard.typed(KeyEvent.VK_UP)){
             moveTiles(Direction.UP);
-            if(!hasStarted) hasStarted = true;
+            if(!hasStarted) hasStarted = !dead;
         }
         if(Keyboard.typed(KeyEvent.VK_DOWN)){
             moveTiles(Direction.DOWN);
-            if(!hasStarted) hasStarted = true;
+            if(!hasStarted) hasStarted = !dead;
         }
     }
 
+    public int getHighestTileValue() {
+        int value = 2;
+        for (int row = 0; row <ROWS; row++){
+            for (int col = 0; col < COLS; col++){
+                if (board[row][col] == null) continue;
+                if (board[row][col].getValue() > value) value =  board[row][col].getValue();
+            }
+        }
+        return value;
+    }
+
+    public void setDead(boolean dead) {
+        if (!this.dead && dead) {
+            lBoard.addTile(getHighestTileValue());
+            lBoard.addScore(scores.getCurrentScore());
+            lBoard.saveScores();
+        }
+    }
+
+    public boolean isWon() {
+        return won;
+    }
+
+    public void setWon(boolean won) {
+        if (!this.won && won) {
+            lBoard.addTime(scores.getTime());
+            lBoard.saveScores();
+        }
+        this.won = won;
+    }
+
+    public ScoreManager getScores() {
+        return scores;
+    }
+
+    public Tile[][] getBoard() {
+        return board;
+    }
+
+    public void setBoard(Tile[][] board) {
+        this.board = board;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
 }
