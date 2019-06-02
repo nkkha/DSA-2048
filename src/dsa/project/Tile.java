@@ -22,6 +22,13 @@ public class Tile {
     private int x;
     private int y;
 
+    private boolean beginningAnimation = true;
+    private double scaleFirst = 0.1;
+    private BufferedImage beginningImage;
+
+    private boolean combineAnimation = false;
+    private double scaleCombine = 1.2;
+    private BufferedImage combineImage;
     private boolean canCombine = true;
 
     public Tile(int value, int x, int y) {
@@ -30,47 +37,49 @@ public class Tile {
         this.y = y;
         slideTo = new Point(x, y);
         tileImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+        beginningImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        combineImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         drawImage();
     }
 
     private void drawImage() {
         Graphics2D g = (Graphics2D) tileImage.getGraphics();
         if (value == 2) {
-            background = new Color(0xe9e9e9);
-            text = new Color(0x000000);
+            background = Color.WHITE;
+            text = Color.BLACK;
         } else if (value == 4) {
-            background = new Color(0xe6daab);
-            text = new Color(0x000000);
+            background = Color.PINK;
+            text = Color.BLACK;
         } else if (value == 8) {
-            background = new Color(0xf79d3d);
-            text = new Color(0xffffff);
+            background = Color.CYAN;
+            text = Color.BLACK;
         } else if (value == 16) {
-            background = new Color(0xef28007);
-            text = new Color(0xffffff);
+            background = Color.ORANGE;
+            text = Color.WHITE;
         } else if (value == 32) {
-            background = new Color(0xf55e3b);
-            text = new Color(0xffffff);
+            background = Color.GREEN;
+            text = Color.WHITE;
         } else if (value == 64) {
-            background = new Color(0xff0000);
-            text = new Color(0xffffff);
+            background = Color.RED;
+            text = Color.WHITE;
         } else if (value == 128) {
-            background = new Color(0xe9de84);
-            text = new Color(0xffffff);
+            background = Color.MAGENTA;
+            text = Color.WHITE;
         } else if (value == 256) {
-            background = new Color(0xf6e873);
-            text = new Color(0xffffff);
+            background = Color.BLUE;
+            text = Color.WHITE;
         } else if (value == 512) {
             background = new Color(0xf5e455);
-            text = new Color(0xffffff);
+            text = Color.WHITE;
         } else if (value == 1024) {
             background = new Color(0xf7e12c);
-            text = new Color(0xffffff);
+            text = Color.WHITE;
         } else if (value == 2048) {
             background = new Color(0xffe400);
-            text = new Color(0xffffff);
+            text = Color.WHITE;
         } else {
             background = Color.BLUE;
-            text = Color.white;
+            text = Color.WHITE;
         }
 
         g.setColor(new Color(0, 0, 0, 0));
