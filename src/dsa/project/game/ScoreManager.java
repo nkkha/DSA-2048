@@ -148,7 +148,7 @@ public class ScoreManager {
     }
 
     public void setTime(long time) {
-        this.time = time;
+        this.time = time + startingTime;
     }
 
     public long getBestTime() {

@@ -5,6 +5,7 @@ import dsa.project.game.Game;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainMenuPanel extends GuiPanel {
 
@@ -30,19 +31,29 @@ public class MainMenuPanel extends GuiPanel {
         scoresButton.setText("Scores");
         quitButton.setText("Quit");
 
-        playButton.addActionListener((ActionEvent e) -> {
-            GuiScreen.getInstance().setCurrentPanel("Play");
+        playButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GuiScreen.getInstance().setCurrentPanel("Play");
+            }
         });
         add(playButton);
 
-        scoresButton.addActionListener((ActionEvent e) -> {
-            GuiScreen.getInstance().setCurrentPanel("Leaderboards");
+        scoresButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GuiScreen.getInstance().setCurrentPanel("Leaderboards");
+            }
         });
         add(scoresButton);
 
-        quitButton.addActionListener((ActionEvent e) -> {
-            System.exit(0);
+        quitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
         });
+
         add(quitButton);
     }
 
