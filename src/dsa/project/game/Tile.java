@@ -120,7 +120,7 @@ public class Tile {
         drawImage();
     }
 
-    public boolean CanCombine() {
+    public boolean canCombine() {
         return canCombine;
     }
 
